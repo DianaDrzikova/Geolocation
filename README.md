@@ -8,9 +8,11 @@ The goal of visual geolocation is to estimate the GPS coordinates of a photograp
     ├── data/                  
     ├── requirements.txt        
     └── src/
-        ├── generate_predictions.py  # Main script to run predictions
-        ├── models/                  # Osv5M model implementation
-        └── utils/                   # Osv5M utilities
+        ├── evaluation/                 # Evaluation of predictions
+        |   └── eval_geolocation.ipynb
+        ├── models/                     # Osv5M model implementation
+        ├── utils/                      # Osv5M utilities
+        └── generate_predictions.py     # Main script to run predictions
 
 Note: The `src/models/` and `src/utils/` directories are directly adapted from the official OSV5M Hugging Face implementation.
 
@@ -51,5 +53,3 @@ https://cphoto.fit.vutbr.cz/crosslocate/dataset/datasets/uniform_dataset/
 
 This project uses the Osv5M baseline model from Hugging Face:
 https://huggingface.co/osv5m/baseline
-
-
