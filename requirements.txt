@@ -12,3 +12,4 @@ peft
 geos
 reverse_geocoder
 matplotlib
+torchvision
