@@ -48,7 +48,7 @@ def osm(input_csv, output_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate images from tar.gz using OSV5M baseline")
-    parser.add_argument("--input_csv", default="../../data/datasetInfoClean.csv", help="Path to input csv")
+    parser.add_argument("--input_csv", default="../../data/gt/datasetInfoClean.csv", help="Path to input csv")
     parser.add_argument("--output_path", default="../../data/", help="Path to input tar.gz archive")
     parser.add_argument("--method", type=str, required=True, help="Clustering method",
                                     choices=["kmeans",

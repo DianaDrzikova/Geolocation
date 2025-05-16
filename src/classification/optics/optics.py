@@ -30,7 +30,7 @@ def optics(input_csv, output_path, min_samples=40, xi=0.02):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Preprocess CrossLocate dataset with OPTICS clustering")
-    parser.add_argument("--input_csv", default="../../../data/datasetInfoClean.csv", help="Path to input csv")
+    parser.add_argument("--input_csv", default="../../../data/gt/datasetInfoClean.csv", help="Path to input csv")
     parser.add_argument("--output_path", default="../../../data", help="Path to output CSV file with clusters")
     parser.add_argument("--min_samples", type=int, default=42, help="Minimum samples per cluster")
     parser.add_argument("--xi", type=float, default=0.02, help="Xi parameter for OPTICS (cluster separation)")
