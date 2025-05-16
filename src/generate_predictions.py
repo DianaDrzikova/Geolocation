@@ -8,8 +8,9 @@ import torch
 from tqdm import tqdm
 import sys
 from models.huggingface import Geolocalizer
+import pandas as pd
 
-def evaluate(tar_path, output_csv):
+def evaluate(tar_path, test_csv_path,output_csv, checkpoint_path, simple_regression=True):
     """Generate predictions from Osv5M model
 
     Args:
@@ -17,22 +18,36 @@ def evaluate(tar_path, output_csv):
         output_csv (filename): path to output CSV file
     """
 
-    # Check for GPU availability
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
     # Load model from Hugging Face
     geolocalizer = Geolocalizer.from_pretrained("osv5m/baseline")
+
+    if checkpoint_path:
+        geolocalizer.mid.reg = torch.nn.Sequential(
+            torch.nn.LayerNorm(1024),
+            torch.nn.Linear(1024, 512),
+            torch.nn.GELU(),
+            torch.nn.Linear(512, 2)
+        )
+    #     
+        print(f"Loading checkpoint from: {checkpoint_path}")
+        geolocalizer.load_state_dict(torch.load(checkpoint_path, map_location=device))
     geolocalizer.eval()
     geolocalizer.to(device)
 
+    test_df = pd.read_csv(test_csv_path)
+    image_names = set(test_df['image'].str.strip())
+
     with tarfile.open(tar_path, "r:gz") as archive, open(output_csv, mode='w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['image', 'latitude_radians', 'longitude_radians'])  
+        writer.writerow(['image', 'latitude_radians', 'longitude_radians'])
 
-        # Filter for image files
-        valid_exts = ('.png', '.jpeg')
-        members = [m for m in archive.getmembers() if m.name.lower().endswith(valid_exts)]
+        valid_exts = ('.png', '.jpeg', '.jpg', '.JPG', '.JPEG', '.PNG')
+
+        members = [m for m in archive.getmembers()
+                   if os.path.basename(m.name) in image_names]
 
         for member in tqdm(members, desc="Evaluating images"):
             file = archive.extractfile(member)
@@ -43,16 +58,25 @@ def evaluate(tar_path, output_csv):
             x = geolocalizer.transform(image).unsqueeze(0).to(device)
 
             with torch.no_grad():
-                gps = geolocalizer(x).squeeze().tolist()  # [latitude, longitude] in radians
 
+                if simple_regression:
+                    features = geolocalizer.model.backbone.clip.vision_model(x).pooler_output
+                    gps = geolocalizer.mid.reg(features).squeeze().tolist()
+                else:
+                    gps = geolocalizer(x).squeeze().tolist()
+            
             writer.writerow([os.path.basename(member.name), gps[0], gps[1]])
 
+            
     print(f"\nPredictions saved to '{output_csv}'")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate images from tar.gz using OSV5M baseline")
-    parser.add_argument("--tar_path", required=True, help="Path to input tar.gz archive")
-    parser.add_argument("--output_csv", required=True, help="Path to output CSV file")
+    parser.add_argument("--tar_path", default="../../query_photos.tar.gz", help="Path to input tar.gz archive")
+    parser.add_argument("--test_csv", default="../data/gt/test.csv", help="Path to test CSV file")
+    parser.add_argument("--output_csv", default="../data/results/new_head_full/finetuned_predictions9.csv", help="Path to output CSV file")
+    parser.add_argument("--checkpoint_path", default="../checkpoints/new_head_full/osv5m_reg_epoch9.pth", help="Path to model checkpoint (.pth)")
+    parser.add_argument("--simple_reg", default=True, type=bool, help="Path to model checkpoint (.pth)")
 
     args = parser.parse_args()
-    evaluate(args.tar_path, args.output_csv)
+    evaluate(args.tar_path, args.test_csv, args.output_csv, args.checkpoint_path, args.simple_reg)
