@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate images from tar.gz using OSV5M baseline")
     parser.add_argument("--tar_path", default="../../query_photos.tar.gz", help="Path to input tar.gz archive")
     parser.add_argument("--test_csv", default="../data/gt/test_with_cells.csv", help="Path to test CSV file")
-    parser.add_argument("--output_csv", default="../data/results/new_head_full/dummy.csv", help="Path to output CSV file")
+    parser.add_argument("--output_csv", default="../data/results/original_head_full/finetuned_predictions9.csv", help="Path to output CSV file")
     parser.add_argument("--checkpoint_path", default="../checkpoints/original_head_full/osv5m_reg_epoch9.pth", help="Path to model checkpoint (.pth)")
     parser.add_argument("--eval_type", default="original", choices=['baseline', 'simple', 'original'], help="Type of evaluation.")
 
