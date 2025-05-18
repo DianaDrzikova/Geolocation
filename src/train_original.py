@@ -46,7 +46,7 @@ def eval_epoch(model, loader, device):
 
     return total_loss / len(loader)
 
-def train(freeze):
+def train(freeze, ckpt_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Geolocalizer.from_pretrained("osv5m/baseline")
 
@@ -58,10 +58,6 @@ def train(freeze):
             param.requires_grad = True
 
     model.to(device)
-    print("model.model.mid:", model.model.mid)
-    print("model.model.head:", model.model.head)
-    print(model)
-
 
     print(f"Model loaded to: {device}.")
 
@@ -76,10 +72,10 @@ def train(freeze):
     scratch_dir = os.environ["SCRATCHDIR"]
     image_dir = os.path.join(scratch_dir, "query_photos")
 
-    train_set = CrossLocateUniformDatasetCells("../data/gt/train_classes.csv", image_dir, transform=transform)
+    train_set = CrossLocateUniformDatasetCells("../data/gt/train_classes_osm_full.csv", image_dir, transform=transform)
     print("Train set done.")
     
-    val_set = CrossLocateUniformDatasetCells("../data/gt/val_classes.csv", image_dir, transform=transform)
+    val_set = CrossLocateUniformDatasetCells("../data/gt/val_classes_osm_full.csv", image_dir, transform=transform)
     print("Validation set done.")
     
     train_loader = DataLoader(train_set, batch_size=16, shuffle=True, num_workers=2, pin_memory=True)
@@ -92,14 +88,15 @@ def train(freeze):
     for epoch in range(10):
         train_loss = train_epoch(model, train_loader, optimizer, device)
         val_loss = eval_epoch(model, val_loader, device)
-        print(f"Epoch {epoch}: Train Loss: {train_loss:.2f} km | Val Loss: {val_loss:.2f} km")
+        print(f"Epoch {epoch}: Train Loss: {train_loss:.2f} | Val Loss: {val_loss:.2f}")
 
-        torch.save(model.state_dict(), f"../checkpoints/osv5m_reg_epoch{epoch}.pth")
+        torch.save(model.state_dict(), os.path.join(ckpt_path, f"osv5m_reg_epoch{epoch}.pth"))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate images from tar.gz using OSV5M baseline")
     parser.add_argument("--freeze", default=False, help="Path to input tar.gz archive")
+    parser.add_argument("--ckpt_path", default="../checkpoints", help="Path where to store models")
 
     args = parser.parse_args()
-    train(args.freeze)
+    train(args.freeze, args.ckpt_path)
