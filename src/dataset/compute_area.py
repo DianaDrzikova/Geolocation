@@ -190,23 +190,7 @@ def area_real(osm_csv, geo_data):
     df_admin1.drop(columns=["NAME_1"], inplace=True)
     df_admin1.to_csv(os.path.join(geo_data,"area_admin1.csv"), index=False)
 
-    # ADMIN2
-    #original_names2 = list(name_mapping2.keys())
-    #mapped_names2 = [name_mapping2[name] for name in original_names2]
-#
-#
-    #df_admin2 = pd.DataFrame({
-    #    "original_name": original_names2,
-    #    "mapped_admin1": mapped_names2
-    #})
-#
-    #df_admin2 = df_admin2.merge(admin2_df[["NAME_2", "NAME_1","area_km2", 'country']], left_on="mapped_admin2", right_on="NAME_2", how="left")
-#
-    #df_admin2.drop(columns=["NAME_1"], inplace=True)
-    #df_admin2.to_csv(os.path.join(geo_data,"area_admin2.csv"), index=False)
-
     plot_distribution(admin1_df, geo_data, level="admin1")
-    #plot_distribution(admin2_df, geo_data, level="admin2", bins=40, log=True)
 
 def area_dataset(osm_csv):
     osm_df = pd.read_csv(osm_csv)
