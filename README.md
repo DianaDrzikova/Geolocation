@@ -51,5 +51,8 @@ Install dependencies with:
 The CrossLocate Uniform dataset can be found on: 
 https://cphoto.fit.vutbr.cz/crosslocate/dataset/datasets/uniform_dataset/
 
+The weights for models can be found on:
+https://huggingface.co/dianadrzikova/knn_geolocalization/tree/main
+
 This project uses the Osv5M baseline model from Hugging Face:
 https://huggingface.co/osv5m/baseline
